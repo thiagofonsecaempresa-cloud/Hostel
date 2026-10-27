@@ -1,21 +1,18 @@
-HOSTEL MK - Sistema de reservas
+HOSTEL MK — Sistema de reservas
 
-Conteúdo:
-- index.html: sistema completo, pronto para publicar no GitHub Pages.
+Arquivos:
+- index.html: sistema completo, pronto para GitHub Pages.
 
 Como publicar:
-1. Crie um repositório no GitHub.
-2. Envie o arquivo index.html para a raiz do repositório.
-3. Abra Settings > Pages.
-4. Em Build and deployment, selecione Deploy from a branch, escolha a branch main e a pasta / (root), e salve.
-5. Aguarde a publicação e abra o endereço fornecido pelo GitHub Pages.
+1. Entre no repositório do GitHub onde está o Hostel MK.
+2. Substitua o index.html pelo novo arquivo.
+3. Faça Commit das alterações.
+4. Abra Settings > Pages e confirme que o GitHub Pages está ativo.
 
 Recursos:
-- Cadastro e edição de reservas e quartos 5 a 9.
-- Calendário mensal com hóspedes por dia, check-in, hospedagem e check-out.
-- Filtro do calendário por quarto e abertura da reserva ao tocar no hóspede.
-- Relatórios CSV e impressão/salvamento em PDF.
-- Backup JSON e importação de backup.
+- Visão geral, reservas, calendário mensal e mapa horizontal de ocupação.
+- O mapa mostra os quartos por linha e 14 dias por vez na horizontal; as barras representam os hóspedes e podem ser tocadas para editar a reserva.
+- Relatórios CSV, impressão/PDF e backup JSON.
+- Os dados são salvos no armazenamento local do navegador. Exporte backups regularmente. GitHub Pages hospeda os arquivos, mas não sincroniza automaticamente os dados entre dispositivos.
 
-Importante: o site é estático. As reservas ficam salvas no armazenamento local do navegador e não são sincronizadas automaticamente entre dispositivos. Faça backups regulares em Backup e dados.
-Sistema desenvolvido por Thiago Fonseca.
+Feito por Thiago Fonseca.
