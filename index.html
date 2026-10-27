@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#173f35">
-<title>Refúgio Hostel | Reservas</title>
+<title>Hostel MK | Reservas</title>
 <style>
 :root{--green:#173f35;--green2:#245849;--mint:#e7f2eb;--cream:#f7f6f1;--ink:#202923;--muted:#748078;--line:#e3e8e2;--white:#fff;--gold:#d8a64e;--red:#b94b46;--shadow:0 10px 30px #183d2b0d}
 *{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font:15px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
@@ -23,7 +23,7 @@ main{min-width:0;padding:30px clamp(18px,3vw,42px) 42px}.topbar{display:flex;jus
 <body>
 <div class="app">
 <aside class="sidebar">
-  <div class="brand"><div class="brand-icon">⌂</div><div><strong>Refúgio Hostel</strong><small>Gestão de hospedagem</small></div></div>
+  <div class="brand"><div class="brand-icon">⌂</div><div><strong>Hostel MK</strong><small>Gestão de hospedagem</small></div></div>
   <div><div class="nav-label">Menu principal</div><nav class="nav">
     <button class="active" data-view="dashboard"><span>◫</span>Visão geral</button>
     <button data-view="reservas"><span>▤</span>Reservas</button>
@@ -31,7 +31,7 @@ main{min-width:0;padding:30px clamp(18px,3vw,42px) 42px}.topbar{display:flex;jus
     <button data-view="relatorios"><span>▥</span>Relatórios</button>
     <button data-view="dados"><span>⇄</span>Backup e dados</button>
   </nav></div>
-  <div class="side-note"><b>✦ Dica de segurança</b>Exporte um backup JSON regularmente. Os dados ficam salvos neste navegador, não automaticamente na nuvem.</div>
+  <div class="side-note"><b>Feito por Thiago Fonseca</b>Projeto desenvolvido para o Hostel MK.<br><br><b>✦ Dica de segurança</b>Exporte um backup JSON regularmente. Os dados ficam salvos neste navegador, não automaticamente na nuvem.</div>
 </aside>
 <main>
   <header class="topbar">
@@ -85,7 +85,7 @@ main{min-width:0;padding:30px clamp(18px,3vw,42px) 42px}.topbar{display:flex;jus
       </div>
     </div></section>
   </section>
-  <div class="footer-note">Refúgio Hostel · Controle local de hospedagem · Faça backups regularmente</div>
+  <div class="footer-note">Hostel MK · Sistema desenvolvido por Thiago Fonseca · Controle local de hospedagem</div>
 </main>
 </div>
 
@@ -114,7 +114,7 @@ main{min-width:0;padding:30px clamp(18px,3vw,42px) 42px}.topbar{display:flex;jus
 <div class="toast" id="toast" role="status"></div>
 <script>
 (() => {
-const KEY='refugio_hostel_data_v1';
+const KEY='hostel_mk_data_v1';
 const defaultRooms=Array.from({length:5},(_,i)=>({id:'room'+(i+1),name:'Quarto '+(i+1),capacity:3,beds:'3 camas individuais'}));
 let data={reservations:[],rooms:defaultRooms};
 const $=id=>document.getElementById(id);
@@ -153,7 +153,7 @@ $('reservationRows').addEventListener('click',e=>{const edit=e.target.closest('[
 $('searchReservations').addEventListener('input',renderReservations);$('filterRoom').addEventListener('change',renderReservations);$('filterStatus').addEventListener('change',renderReservations);
 function csvEscape(v){let s=String(v??'');if(/^[=+\-@]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"'}
 function download(name,content,type='text/csv;charset=utf-8;'){const blob=new Blob(['\ufeff',content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
-function exportJSON(){const payload={app:'Refúgio Hostel',version:1,exportedAt:new Date().toISOString(),...data};download('backup-hostel-'+today()+'.json',JSON.stringify(payload,null,2),'application/json');toast('Backup JSON exportado.')}
+function exportJSON(){const payload={app:'Hostel MK',createdBy:'Thiago Fonseca',version:1,exportedAt:new Date().toISOString(),...data};download('backup-hostel-mk-'+today()+'.json',JSON.stringify(payload,null,2),'application/json');toast('Backup JSON exportado.')}
 function csvFor(rs){const rows=[['Código','Hóspede','Telefone','Quarto','Check-in','Check-out','Noites','Pessoas','Valor total (R$)','Valor pago (R$)','Saldo (R$)','Pagamento','Status hospedagem','Check-in','Check-out','Conflito','Observações']];rs.forEach(r=>rows.push([r.id,r.guest,r.phone,roomById(r.roomId).name,r.checkin,r.checkout,nights(r),r.people,r.total,r.paid,balance(r),payStatus(r)[0],status(r)[0],r.checkinStatus,r.checkoutStatus,conflicts(r)?'SIM':'NÃO',r.notes]));return rows.map(row=>row.map(csvEscape).join(';')).join('\r\n')}
 function filteredReport(){const start=$('reportStart').value,end=$('reportEnd').value;return data.reservations.filter(r=>(!start||r.checkin<=end||!end)&&(!end||r.checkout>=start||!start)&&(!start||r.checkin>=start||r.checkout>=start)&&(!end||r.checkin<=end||r.checkout<=end)).sort((a,b)=>a.checkin.localeCompare(b.checkin))}
 function reportRowsFor(rs){$('reportRows').innerHTML=rs.length?rs.map(r=>`<tr><td>${esc(r.guest)}</td><td>${esc(roomById(r.roomId).name)}</td><td>${dateFmt(r.checkin)}</td><td>${dateFmt(r.checkout)}</td><td>${money(r.total)}</td><td>${money(r.paid)}</td><td>${money(balance(r))}</td></tr>`).join(''):'<tr><td colspan="7" class="empty">Nenhuma reserva neste período.</td></tr>'}

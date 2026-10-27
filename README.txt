@@ -1,6 +1,7 @@
-# Refúgio Hostel
+# Hostel MK
 
 Sistema web estático de reservas, check-in/check-out e relatórios.
+Desenvolvido por Thiago Fonseca.
 
 ## Publicar no GitHub Pages
 1. Extraia o ZIP.
