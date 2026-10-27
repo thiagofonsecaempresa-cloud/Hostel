@@ -57,7 +57,7 @@ main{min-width:0;padding:30px clamp(18px,3vw,42px) 42px}.topbar{display:flex;jus
   </section>
 
   <section class="view" id="view-quartos">
-    <section class="panel"><div class="panel-head"><div><h2>Seus 5 quartos</h2><p>Ocupação calculada a partir das datas das reservas</p></div><button class="btn" id="editRoomSetup">✎ Configurar quartos</button></div><div class="panel-body"><div class="room-grid" id="allRooms"></div></div></section>
+    <section class="panel"><div class="panel-head"><div><h2>Quartos 5 a 9</h2><p>Ocupação calculada a partir das datas das reservas</p></div><button class="btn" id="editRoomSetup">✎ Configurar quartos</button></div><div class="panel-body"><div class="room-grid" id="allRooms"></div></div></section>
     <section class="panel"><div class="panel-head"><div><h2>Como interpretar</h2></div></div><div class="panel-body" style="display:flex;gap:20px;flex-wrap:wrap"><span><i class="badge green">Livre hoje</i> Sem hospedagem ativa hoje</span><span><i class="badge yellow">Ocupado hoje</i> Há hóspedes no quarto</span><span><i class="badge red">Conflito</i> Períodos de reservas se sobrepõem</span></div></section>
   </section>
 
@@ -110,12 +110,12 @@ main{min-width:0;padding:30px clamp(18px,3vw,42px) 42px}.topbar{display:flex;jus
  </div><div class="modal-foot"><button type="button" class="btn danger hidden" id="deleteReservation">Excluir reserva</button><div style="display:flex;gap:9px;margin-left:auto"><button type="button" class="btn" id="cancelModal">Cancelar</button><button type="submit" class="btn primary">Salvar reserva</button></div></div></form>
  </div>
 </div>
-<div class="modal-backdrop" id="roomsModal" role="dialog" aria-modal="true" aria-labelledby="roomsModalTitle"><div class="modal"><div class="modal-head"><h2 id="roomsModalTitle">Configurar quartos</h2><button class="close" id="closeRooms">×</button></div><div class="modal-body"><p class="help" style="margin:0 0 15px">O hostel tem cinco quartos. Ajuste o nome e a capacidade de cada um. A configuração de camas é apenas informativa.</p><div id="roomSettings" class="form-grid"></div></div><div class="modal-foot"><button class="btn" id="cancelRooms">Cancelar</button><button class="btn primary" id="saveRooms">Salvar configuração</button></div></div></div>
+<div class="modal-backdrop" id="roomsModal" role="dialog" aria-modal="true" aria-labelledby="roomsModalTitle"><div class="modal"><div class="modal-head"><h2 id="roomsModalTitle">Configurar quartos</h2><button class="close" id="closeRooms">×</button></div><div class="modal-body"><p class="help" style="margin:0 0 15px">O hostel tem cinco quartos, numerados de 5 a 9. Ajuste o nome e a capacidade de cada um. A configuração de camas é apenas informativa.</p><div id="roomSettings" class="form-grid"></div></div><div class="modal-foot"><button class="btn" id="cancelRooms">Cancelar</button><button class="btn primary" id="saveRooms">Salvar configuração</button></div></div></div>
 <div class="toast" id="toast" role="status"></div>
 <script>
 (() => {
 const KEY='hostel_mk_data_v1';
-const defaultRooms=Array.from({length:5},(_,i)=>({id:'room'+(i+1),name:'Quarto '+(i+1),capacity:3,beds:'3 camas individuais'}));
+const defaultRooms=Array.from({length:5},(_,i)=>({id:'room'+(i+5),name:'Quarto '+(i+5),capacity:3,beds:'3 camas individuais'}));
 let data={reservations:[],rooms:defaultRooms};
 const $=id=>document.getElementById(id);
 const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
@@ -128,7 +128,14 @@ const roomById=id=>data.rooms.find(r=>r.id===id)||{name:id||'—',capacity:3,bed
 const overlaps=(a,b)=>a.id!==b.id&&a.roomId===b.roomId&&a.checkin<b.checkout&&a.checkout>b.checkin;
 const conflicts=r=>data.reservations.some(x=>overlaps(r,x));
 const allConflicts=()=>data.reservations.filter(r=>conflicts(r));
-function load(){try{const raw=localStorage.getItem(KEY);if(raw){const p=JSON.parse(raw);if(Array.isArray(p.reservations)&&Array.isArray(p.rooms)){data=p;}}}catch(e){} if(!data.rooms||data.rooms.length!==5)data.rooms=defaultRooms; save(false);}
+function load(){try{const raw=localStorage.getItem(KEY);if(raw){const p=JSON.parse(raw);if(Array.isArray(p.reservations)&&Array.isArray(p.rooms)){data=p;
+  // Migra automaticamente a configuração antiga (quartos 1–5) para os quartos 5–9.
+  if(data.rooms.length===5 && data.rooms.every((r,i)=>r.id==='room'+(i+1) || r.name==='Quarto '+(i+1))){
+    const oldToNew={};
+    data.rooms=data.rooms.map((r,i)=>{oldToNew[r.id]='room'+(i+5);return {...r,id:'room'+(i+5),name:'Quarto '+(i+5)};});
+    data.reservations=data.reservations.map(r=>({...r,roomId:oldToNew[r.roomId]||r.roomId}));
+  }
+}}}catch(e){} if(!data.rooms||data.rooms.length!==5)data.rooms=defaultRooms; save(false);}
 function save(render=true){localStorage.setItem(KEY,JSON.stringify(data));if(render)refresh();}
 function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('show'),3200)}
 function status(r){if(r.checkoutStatus==='Realizado')return ['Finalizada','gray'];if(r.checkinStatus==='Realizado')return ['Hospedado','green'];if(r.checkin>today())return ['Futura','yellow'];if(r.checkout<today())return ['Saída pendente','red'];return ['Entrada pendente','yellow']}
@@ -166,7 +173,7 @@ $('importFile').addEventListener('change',async e=>{const f=e.target.files[0];if
 $('clearData').onclick=()=>{if(confirm('Tem certeza de que deseja apagar TODAS as reservas e configurações locais?')){data={reservations:[],rooms:defaultRooms.map(r=>({...r}))};save();toast('Dados locais apagados.')}};
 $('editRoomSetup').onclick=()=>{renderRoomSettings();$('roomsModal').classList.add('open')};$('closeRooms').onclick=$('cancelRooms').onclick=()=>$('roomsModal').classList.remove('open');
 function renderRoomSettings(){$('roomSettings').innerHTML=data.rooms.map((r,i)=>`<div class="form-group"><label>Nome do quarto ${i+1}</label><input class="field" data-room-name="${i}" maxlength="40" value="${esc(r.name)}"></div><div class="form-group"><label>Capacidade de pessoas</label><input class="field" data-room-capacity="${i}" type="number" min="1" max="30" value="${Number(r.capacity)||3}"><div class="help">Configuração das camas</div><input class="field" data-room-beds="${i}" maxlength="100" value="${esc(r.beds||'')}" style="margin-top:6px"></div>`).join('')}
-$('saveRooms').onclick=()=>{data.rooms.forEach((r,i)=>{r.name=$(`[data-room-name="${i}"]`).value.trim()||`Quarto ${i+1}`;r.capacity=Math.max(1,Number($(`[data-room-capacity="${i}"]`).value)||3);r.beds=$(`[data-room-beds="${i}"]`).value.trim()});save();$('roomsModal').classList.remove('open');toast('Configuração dos quartos atualizada.')};
+$('saveRooms').onclick=()=>{data.rooms.forEach((r,i)=>{r.name=$(`[data-room-name="${i}"]`).value.trim()||`Quarto ${i+5}`;r.capacity=Math.max(1,Number($(`[data-room-capacity="${i}"]`).value)||3);r.beds=$(`[data-room-beds="${i}"]`).value.trim()});save();$('roomsModal').classList.remove('open');toast('Configuração dos quartos atualizada.')};
 $('reservationModal').addEventListener('click',e=>{if(e.target===$('reservationModal'))closeModal()});$('roomsModal').addEventListener('click',e=>{if(e.target===$('roomsModal'))$('roomsModal').classList.remove('open')});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();$('roomsModal').classList.remove('open')}});
 load();fillRoomSelects();refresh();
